@@ -24,6 +24,7 @@ class MainFrame extends JFrame implements ActionListener {
 
     public MainFrame(String username){
         super(username+",欢迎使用个人理财账本!");
+
         this.username=username;
         Container c=this.getContentPane();
         c.setLayout(new BorderLayout());
