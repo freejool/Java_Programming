@@ -27,6 +27,10 @@ public class AlertDialog extends JDialog implements ActionListener {
         this.setVisible(true);
     }
 
+    public void setBText(String str){
+        this.jLabel.setText(str);
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
         if (jButton == e.getSource()) {

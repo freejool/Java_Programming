@@ -19,4 +19,19 @@ public class Util {
         }
         return 0;
     }
+
+    public static String charsToString(char [] chars){
+        StringBuilder sb=new StringBuilder("");
+        for (char aChar : chars) {
+            sb.append(aChar);
+        }
+        return sb.toString();
+    }
+
+    public static void main(String[] args) {
+        char [] a= {'a','b','c','d','e'};
+
+        String str=charsToString(a);
+        System.out.println(str);
+    }
 }

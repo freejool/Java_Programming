@@ -1,5 +1,7 @@
 package Frames;
 
+import Util.Util;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -18,8 +20,8 @@ public class LoginFrame extends JFrame implements ActionListener {
         super("欢迎使用个人理财账本!");
         l_user = new JLabel("用户名：", JLabel.RIGHT);
         l_pwd = new JLabel(" 密码：", JLabel.RIGHT);
-        t_user = new JTextField(31);
-        t_pwd = new JPasswordField(31);
+        t_user = new JTextField("t", 31); // TODO delete t
+        t_pwd = new JPasswordField("t", 31); // TODO delete t
         b_ok = new JButton("登录");
         b_cancel = new JButton("退出");
         //布局方式FlowLayout，一行排满排下一行
@@ -60,17 +62,17 @@ public class LoginFrame extends JFrame implements ActionListener {
                 passwd = raf.readLine();
 
                 inputUserName = t_user.getText();
-                inputPasswd = Arrays.toString(t_pwd.getPassword());
+                inputPasswd = Util.charsToString(t_pwd.getPassword());
 
-//                if (!userName.equals(inputUserName)) {
-//                    AlertDialog ad = new AlertDialog("用户名错误");
-//                } else if (!passwd.equals(inputPasswd)) {
-//                    AlertDialog ad = new AlertDialog("密码错误");
-//                } else {
-//                    new MainFrame(t_user.getText().trim());
-//                }
+                if (!userName.equals(inputUserName)) {
+                    new AlertDialog("用户名错误");
+                } else if (!passwd.equals(inputPasswd)) {
+                    new AlertDialog("密码错误");
+                } else {
+                    new MainFrame(t_user.getText().trim());
+                    this.dispose();
+                }
 
-                new MainFrame(t_user.getText().trim());
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
