@@ -70,7 +70,6 @@ public class JComboBox8 implements ItemListener,ActionListener{
                 fontsize=Integer.parseInt((String)e.getItem());
                 label.setText("Swing 目前字形大小:"+fontsize);
             }catch(NumberFormatException ne){//若所输入的值不是整数，则不作任何的操作.
-
             }
         }
     }

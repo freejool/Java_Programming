@@ -20,7 +20,7 @@ public class Conn {
         try {
             //注册驱动
             //DriverManager.registerDriver(new com.mysql.jdbc.Driver());
-            Class.forName("com.mysql.jdbc.Driver");
+            Class.forName("com.mysql.cj.jdbc.Driver");
             //连接数据库
             con = DriverManager.getConnection(url, username, password);
             //创建数据库执行对象

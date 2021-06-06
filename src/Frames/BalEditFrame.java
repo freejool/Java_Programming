@@ -38,9 +38,11 @@ class BalEditFrame extends JFrame implements ActionListener, ItemListener {
 
 
         c_type = new JComboBox<>(balType);
-        c_item = new JComboBox<>(itemTypeIn);
         c_type.addItemListener(this);
         c_type.addActionListener(this);
+        c_type.
+        c_item = new JComboBox<>(itemTypeIn);
+        c_item.setEditable(true);
         b_select = new JButton("查询");
         b_update = new JButton("修改");
         b_delete = new JButton("删除");
@@ -126,9 +128,15 @@ class BalEditFrame extends JFrame implements ActionListener, ItemListener {
     public void itemStateChanged(ItemEvent e) {
         if (e.getStateChange() == ItemEvent.SELECTED) {
             if (e.getItem().equals("收入")) {
-                c_item = new JComboBox<>(itemTypeIn);
             } else if (e.getItem().equals("支出")) {
-                c_item = new JComboBox<>(itemTypeOut);
+                c_item.removeAllItems();
+                for (String i : itemTypeIn) {
+                    c_item.addItem(i);
+                }
+                c_item.removeAllItems();
+                for (String i : itemTypeOut) {
+                    c_item.addItem(i);
+                }
             }
         }
         p1.repaint();
