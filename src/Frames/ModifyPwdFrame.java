@@ -1,9 +1,12 @@
 package Frames;
 
+import Util.User;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.SQLException;
 
 //修改密码界面
 class ModifyPwdFrame extends JFrame implements ActionListener {
@@ -15,12 +18,12 @@ class ModifyPwdFrame extends JFrame implements ActionListener {
     public ModifyPwdFrame(String username){
         super("修改密码");
         this.username=username;
-        l_oldPWD=new JLabel("旧密码");
-        l_newPWD=new JLabel("新密码：");
-        l_newPWDAgain=new JLabel("确认新密码：");
-        t_oldPWD=new JPasswordField(15);
-        t_newPWD=new JPasswordField(15);
-        t_newPWDAgain=new JPasswordField(15);
+        l_oldPWD=new JLabel("旧密码:");
+        l_newPWD=new JLabel("新密码:");
+        l_newPWDAgain=new JLabel("再次输入:");
+        t_oldPWD=new JPasswordField(20);
+        t_newPWD=new JPasswordField(20);
+        t_newPWDAgain=new JPasswordField(19);
         b_ok=new JButton("确定");
         b_cancel=new JButton("取消");
         Container c=this.getContentPane();
@@ -35,6 +38,7 @@ class ModifyPwdFrame extends JFrame implements ActionListener {
         c.add(b_cancel);
         b_ok.addActionListener(this);
         b_cancel.addActionListener(this);
+        t_newPWDAgain.addActionListener(this);
         this.setResizable(false);
         this.setSize(280,160);
         Dimension screen = this.getToolkit().getScreenSize();
@@ -44,9 +48,19 @@ class ModifyPwdFrame extends JFrame implements ActionListener {
 
     public void actionPerformed(ActionEvent e) {
         if(b_cancel==e.getSource()){
-            //添加代码
-        }else if(b_ok==e.getSource()){  //修改密码
-            //添加代码
+            this.dispose();
+        }else if(b_ok==e.getSource()||t_newPWDAgain==e.getSource()){  //修改密码
+            try {
+                if(User.Modify(t_oldPWD.getText(),t_newPWD.getText())){
+                    new PwdChangedDialog("密码修改成功，请重新登录");
+                }else{
+                    new AlertDialog("修改失败,请重试");
+                }
+            } catch (ClassNotFoundException classNotFoundException) {
+                classNotFoundException.printStackTrace();
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
         }
     }
 }

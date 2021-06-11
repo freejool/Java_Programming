@@ -1,36 +1,41 @@
 package Frames;
 
-import Util.*;
+import Util.Conn;
+import Util.Record;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.PipedReader;
 import java.sql.SQLException;
-
-
-import static java.lang.Boolean.*;
+import java.util.*;
+import java.util.List;
 
 //主界面
-public class MainFrame extends JFrame implements ActionListener {
+class MainFrame extends JFrame implements ActionListener {
     private JMenuBar mb = new JMenuBar();
     private JMenu m_system = new JMenu("系统管理");
     private JMenu m_fm = new JMenu("收支管理");
     private JMenuItem mI[] = {new JMenuItem("密码重置"), new JMenuItem("退出系统")};
     private JMenuItem m_FMEdit = new JMenuItem("收支编辑");
-    private JLabel l_type, l_fromdate, l_todate, l_bal, l_ps;
+    private JLabel l_type, l_fromdate, l_todate, l_bal;
+    private JButton b_select;
     private JTextField t_fromdate, t_todate;
-    private JButton b_select1, b_select2;
-    private JComboBox c_type;
+    private JComboBox<String> c_type;
     private JPanel p_condition, p_detail;
-    private String s1[] = {"收入", "支出"};
+    private String balTypes[] = {"总账单", "收入", "支出"};
     private double bal1, bal2;
     private JTable table;
     private String username;
+    private DefaultTableModel model = null;
+    private DateChooser dateChooserFromDate = DateChooser.getInstance("yyyy-MM-dd");
+    private DateChooser dateChooserToDate = DateChooser.getInstance("yyyy-MM-dd");
 
     public MainFrame(String username) {
         super(username + ",欢迎使用个人理财账本!");
-
         this.username = username;
         Container c = this.getContentPane();
         c.setLayout(new BorderLayout());
@@ -45,14 +50,14 @@ public class MainFrame extends JFrame implements ActionListener {
         mI[1].addActionListener(this);
 
         l_type = new JLabel("收支类型：");
-        c_type = new JComboBox(s1);
-        b_select1 = new JButton("查询");
+        c_type = new JComboBox<>(balTypes);
         l_fromdate = new JLabel("起始时间");
-        t_fromdate = new JTextField(8);
+        t_fromdate = new JTextField(" 点击选择日期 ", 8);
+        dateChooserFromDate.register(t_fromdate);
         l_todate = new JLabel("终止时间");
-        t_todate = new JTextField(8);
-        b_select2 = new JButton("查询");
-        l_ps = new JLabel("注意：时间格式为YYYYMMDD，例如：20150901");
+        t_todate = new JTextField(" 点击选择日期 ", 8);
+        dateChooserToDate.register(t_todate);
+        b_select = new JButton("查询");
         p_condition = new JPanel();
         p_condition.setLayout(new GridLayout(3, 1));
         p_condition.setBorder(BorderFactory.createCompoundBorder(
@@ -64,50 +69,65 @@ public class MainFrame extends JFrame implements ActionListener {
         JPanel p3 = new JPanel();
         p1.add(l_type);
         p1.add(c_type);
-        p1.add(b_select1);
         p2.add(l_fromdate);
         p2.add(t_fromdate);
         p2.add(l_todate);
         p2.add(t_todate);
-        p2.add(b_select2);
-        p3.add(l_ps);
+        p3.add(b_select);
         p_condition.add(p1);
         p_condition.add(p2);
         p_condition.add(p3);
         c.add(p_condition, "Center");
 
-        b_select1.addActionListener(this);
-        b_select2.addActionListener(this);
+        b_select.addActionListener(this);
 
         p_detail = new JPanel();
         p_detail.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createTitledBorder("收支明细信息"),
                 BorderFactory.createEmptyBorder(5, 5, 5, 5)));
         l_bal = new JLabel();
-        String[] cloum = {"编号", "日期", "类型", "内容", "金额",};
-        Conn conn = new Conn();
-        List <Util.Record> rsFromSql = null;
+        Conn con = new Conn();
+        List<Record> list = null;
         try {
-            (conn.select());
-            new JTable(rsFromSql, cloum);
-        } catch (SQLException throwables) {
+            list = con.select();
+        } catch (
+                SQLException throwables) {
             throwables.printStackTrace();
-        } finally {
-            conn.close();
         }
-        Object[][] row = new Object[][]{
-                {"Kathy", "Smith",
-                        "Snowboarding", 5, FALSE},
-                {"John", "Doe",
-                        "Rowing", 3, TRUE},
-                {"Sue", "Black",
-                        "Knitting", 2, FALSE},
-                {"Jane", "White",
-                        "Speed reading", 20, TRUE},
-                {"Joe", "Brown",
-                        "Pool", 10, FALSE}
-        };
-        table = new JTable(row, cloum);
+        String[] column = {"编号", "日期", "类型", "内容", "金额",};
+        Vector<String> vTitle = new Vector<>();
+        Collections.addAll(vTitle, column);
+        Vector<Vector<Object>> vData = new Vector<>();
+        Vector<Object> vRow = null;
+        if (list != null) {
+            for (Record i : list) {
+                vRow = new Vector<>();
+                vRow.add(i.getid());
+                vRow.add(i.getDate());
+                vRow.add(i.getType());
+                vRow.add(i.getContent());
+                vRow.add(i.getAmount());
+                vData.add(vRow);
+            }
+        }
+
+        model = new DefaultTableModel(vData, vTitle);
+
+        table = new JTable();
+        //不可编辑
+        table.setEnabled(false);
+        //列不可拖动
+        table.getTableHeader().setReorderingAllowed(false);
+        //列大小不可变
+        table.getTableHeader().setResizingAllowed(false);
+        table.setModel(model);
+
+        //居中显示
+        DefaultTableCellRenderer cr = new DefaultTableCellRenderer();
+        cr.setHorizontalAlignment(JLabel.CENTER);
+        table.setDefaultRenderer(Object.class, cr);
+
+
         JScrollPane scrollpane = new JScrollPane(table);
         scrollpane.setPreferredSize(new Dimension(580, 350));
         scrollpane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
@@ -116,33 +136,102 @@ public class MainFrame extends JFrame implements ActionListener {
         p_detail.add(scrollpane);
         c.add(p_detail, "South");
 
-        //添加代码
-
-
-        if (bal1 < 0)
-            l_bal.setText("个人总收支余额为" + bal1 + "元。您已超支，请适度消费！");
+        try {
+            bal1 = con.sumIncome();
+            bal2 = con.sumOutcome();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        if (bal1 - bal2 < 0)
+            l_bal.setText("个人总收入为:" + bal1 + "元，个人总支出:" + bal2 + " 您已超支，请适度消费！");
         else
-            l_bal.setText("个人总收支余额为" + bal1 + "元。");
+            l_bal.setText("个人总收入为:" + bal1 + "元，个人总支出:" + bal2);
 
         this.setResizable(false);
         this.setSize(600, 580);
         Dimension screen = this.getToolkit().getScreenSize();
         this.setLocation((screen.width - this.getSize().width) / 2, (screen.height - this.getSize().height) / 2);
         this.setVisible(true);
+        con.close();
     }
 
     public void actionPerformed(ActionEvent e) {
         Object temp = e.getSource();
         if (temp == mI[0]) {
+            //打开修改密码界面
             new ModifyPwdFrame(username);
         } else if (temp == mI[1]) {
-            //添加代码
+            //退出程序
+            System.exit(0);
         } else if (temp == m_FMEdit) {
+            //打开收支编辑窗口
             new BalEditFrame();
-        } else if (temp == b_select1) {  //根据收支类型查询
-            //添加代码
-        } else if (temp == b_select2) {   //根据时间范围查询
-            //添加代码
+
+        } else if (temp == b_select) {
+            //根据收支类型查询
+            Conn con = new Conn();
+
+            String fromDate = dateChooserFromDate.getStrDate();
+            String toDate = dateChooserToDate.getStrDate();
+            if (!dateChooserFromDate.isTouched()) {
+                fromDate = "0001-01-01";
+            }
+            if (!dateChooserToDate.isTouched()) {
+                toDate = "3000-01-01";
+            }
+            // 获取起止时间
+
+            List<Record> list = null;
+            ((DefaultTableModel) table.getModel()).getDataVector().clear();
+//            for (int i = model.getRowCount(); i > 0; i--) {
+//                model.removeRow(i - 1);
+//            }
+            String[] column = {"编号", "日期", "类型", "内容", "金额",};
+            Vector<String> vTitle = new Vector<>();
+            Collections.addAll(vTitle, column);
+            Vector<Vector<Object>> vData = new Vector<>();
+            Vector<Object> vRow = null;
+            if (Objects.equals(c_type.getSelectedItem(), "总账单")) {
+                try {
+                    list = con.select(fromDate, toDate, null);
+                } catch (
+                        SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+
+            } else if (Objects.equals(c_type.getSelectedItem(), "收入")) {
+                try {
+                    list = con.select(fromDate, toDate, "income");
+                } catch (
+                        SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            } else if (Objects.equals(c_type.getSelectedItem(), "支出")) {
+                try {
+                    list = con.select(fromDate, toDate, "outcome");
+                } catch (
+                        SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+            if (list != null) {
+                for (Record i : list) {
+                    vRow = new Vector<>();
+                    vRow.add(i.getid());
+                    vRow.add(i.getDate());
+                    vRow.add(i.getType());
+                    vRow.add(i.getContent());
+                    vRow.add(i.getAmount());
+                    vData.add(vRow);
+                }
+            }
+
+            for (Vector<Object> v : vData) {
+                model.addRow(v);
+            }
+            p_detail.repaint();
+            con.close();
+
         }
     }
 }

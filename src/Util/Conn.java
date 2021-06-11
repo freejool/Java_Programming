@@ -1,6 +1,5 @@
 package Util;
 
-import javax.swing.plaf.nimbus.State;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -14,13 +13,9 @@ public class Conn {
     private ResultSet rs = null;
     private String sql;
 
-    public Statement getStm() {
-        return stm;
-    }
-
     public Conn() {
         ResourceBundle bundle = ResourceBundle.getBundle("Util/Account");
-        String url = bundle.getString("url1");
+        String url = bundle.getString("url");
         String username = bundle.getString("username");
         String password = bundle.getString("password");
         try {
@@ -39,44 +34,6 @@ public class Conn {
         }
     }
 
-    public Conn(String table) {
-        ResourceBundle bundle = ResourceBundle.getBundle("Util/Account");
-        String url = bundle.getString(table);
-        String username = bundle.getString("username");
-        String password = bundle.getString("password");
-        try {
-            //注册驱动
-            //DriverManager.registerDriver(new com.mysql.jdbc.Driver());
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            //连接数据库
-            con = DriverManager.getConnection(url, username, password);
-            //创建数据库执行对象
-            stm = con.createStatement();
-            //执行sql语句
-        } catch (SQLException | ClassNotFoundException throwables) {
-            throwables.printStackTrace();
-        }
-    }
-
-    public static boolean login(String userName, String password) {
-        Conn conn = new Conn("url2");
-        String sql = "select * from login where username'" + userName + "' and password '" + password;
-        Statement stm = null;
-        ResultSet rs = null;
-        try {
-            stm = conn.getStm();
-            rs = stm.executeQuery(sql);
-        } catch (Exception throwables) {
-            throwables.printStackTrace();
-        }finally {
-
-            try {
-                return !rs.next();
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
-            }
-        }return false;
-    }
 
     public void insert(Record re) {
         sql = "insert into t_shouzhi values(" + re.getid() + ",\"" + re.getDate() +
@@ -130,8 +87,12 @@ public class Conn {
         }
     }
 
-    public List<Record> select(String startDate, String overDate, String type) throws SQLException {
-        sql = "select * from t_shouzhi where type= '" + type + "' and date between '" + startDate + "' and '" + overDate + "'";
+    public List<Record> select(String fromDate, String toDate, String type) throws SQLException {
+        if (type == null) {
+            sql = "select * from t_shouzhi where date between '" + fromDate + "' and '" + toDate + "'";
+        } else {
+            sql = "select * from t_shouzhi where type= '" + type + "' and date between '" + fromDate + "' and '" + toDate + "'";
+        }
         return QueryCarryout();
     }
 
@@ -165,6 +126,24 @@ public class Conn {
         return QueryCarryout();
     }
 
+    public Double sumIncome() throws SQLException {
+        sql = "select sum(amount) sumincome from t_shouzhi where type='income'";
+        rs = stm.executeQuery(sql);
+        if (!rs.next()) {
+            return null;
+        }
+        return rs.getDouble("sumincome");
+    }
+
+    public Double sumOutcome() throws SQLException {
+        sql = "select sum(amount) sumoutcome from t_shouzhi where type='outcome'";
+        rs = stm.executeQuery(sql);
+        if (!rs.next()) {
+            return null;
+        }
+        return rs.getDouble("sumoutcome");
+    }
+
     private List<Record> QueryCarryout() throws SQLException {
         rs = stm.executeQuery(sql);
         if (!rs.next()) {
@@ -174,10 +153,6 @@ public class Conn {
         List<Record> list = new ArrayList<>();
         list.add(new Record(rs.getInt("id"), rs.getString("date"),
                 rs.getString("type"), rs.getString("content"), rs.getDouble("amount")));
-
-        /*System.out.println(" id | date | type | content | amount");
-        System.out.println(rs.getInt("id")+"  "+rs.getString("date")+
-                "  "+rs.getString("type")+"  "+rs.getString("content")+" "+rs.getDouble("amount"));*/
 
         while (rs.next()) {
             list.add(new Record(rs.getInt("id"), rs.getString("date"),
@@ -207,19 +182,6 @@ public class Conn {
                 con.close();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
-        }
-    }
-
-    public static void main(String[] args) {
-        Conn conn = new Conn();
-        try {
-
-            List<Record> list = conn.select();
-            for (Record i : list) {
-                System.out.println(i);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
     }
 }

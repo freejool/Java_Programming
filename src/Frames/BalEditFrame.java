@@ -13,6 +13,7 @@ class BalEditFrame extends JFrame implements ActionListener, ItemListener {
     private JLabel l_id, l_date, l_bal, l_type, l_item;
     private JTextField t_id, t_date, t_bal;
     private DateChooser dateChooser = DateChooser.getInstance("yyyy-MM-dd");
+
     private JComboBox c_type, c_item;
     private JButton b_update, b_delete, b_select, b_new, b_clear;
     private JPanel p1, p2, p3;

@@ -51,6 +51,8 @@ public class DateChooser extends JPanel {
 
     private static final long serialVersionUID = 4529266044762990227L;
 
+    private boolean isTouched=false;
+
     private Date initDate;
     private Calendar now = Calendar.getInstance();
     private Calendar select;
@@ -541,6 +543,7 @@ public class DateChooser extends JPanel {
 
         public void mousePressed(MouseEvent e) {
             isSelected = true;
+            isTouched=true;
             update();
         }
 
@@ -680,6 +683,10 @@ public class DateChooser extends JPanel {
         private void updateDate() {
 
         }
+    }
+
+    public boolean isTouched() {
+        return isTouched;
     }
 
     public static void main(String[] args) {

@@ -6,12 +6,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 
-public class AlertDialog extends JDialog implements ActionListener {
+public class PwdChangedDialog extends JDialog implements ActionListener {
 
     private JLabel jLabel = new JLabel();
     private JButton jButton = new JButton();
 
-    public AlertDialog(String content) {
+    public PwdChangedDialog(String content) {
         jLabel.setText(content);
         jButton.setText("确定");
         jButton.addActionListener(this);
@@ -34,6 +34,7 @@ public class AlertDialog extends JDialog implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (jButton == e.getSource()) {
+            System.exit(0);
             this.dispose();
         }
     }

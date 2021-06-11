@@ -1,14 +1,11 @@
 package Frames;
 
-import Util.Util;
-
+import Util.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.RandomAccessFile;
-import java.util.Arrays;
+import java.sql.SQLException;
 
 public class LoginFrame extends JFrame implements ActionListener {
     private JLabel l_user, l_pwd; //用户名标签，密码标签
@@ -19,26 +16,30 @@ public class LoginFrame extends JFrame implements ActionListener {
     public LoginFrame() {
         super("欢迎使用个人理财账本!");
         l_user = new JLabel("用户名：", JLabel.RIGHT);
-        l_pwd = new JLabel(" 密码：", JLabel.RIGHT);
-        t_user = new JTextField("t", 31); // TODO delete t
-        t_pwd = new JPasswordField("t", 31); // TODO delete t
+        l_pwd = new JLabel("    密码：", JLabel.RIGHT);
+        t_user = new JTextField("", 31); // TODO delete t
+        t_pwd = new JPasswordField("", 31); // TODO delete t
         b_ok = new JButton("登录");
         b_cancel = new JButton("退出");
         //布局方式FlowLayout，一行排满排下一行
         Container c = this.getContentPane();
         c.setLayout(new FlowLayout());
+
         c.add(l_user);
         c.add(t_user);
         c.add(l_pwd);
         c.add(t_pwd);
         c.add(b_ok);
         c.add(b_cancel);
+
         //为按钮添加监听事件
         b_ok.addActionListener(this);
+        t_user.addActionListener(this);
+        t_pwd.addActionListener(this);
         b_cancel.addActionListener(this);
-        //界面大小不可调整 
-        this.setResizable(false);
-        this.setSize(455, 150);
+        //界面大小不可调整
+        this.setResizable(true);
+        this.setSize(390, 150);
 
         //界面显示居中
         Dimension screen = this.getToolkit().getScreenSize();
@@ -50,31 +51,19 @@ public class LoginFrame extends JFrame implements ActionListener {
         if (b_cancel == e.getSource()) {
             this.dispose();
             //添加退出代码
-        } else if (b_ok == e.getSource()) {
+        } else if (b_ok == e.getSource()||t_pwd==e.getSource()) {
             //添加代码，验证身份成功后显示主界面
-            File file = new File("pwd.txt");
-            RandomAccessFile raf = null;
-            String userName, inputUserName;
-            String passwd, inputPasswd;
             try {
-                raf = new RandomAccessFile(file, "r");
-                userName = raf.readLine();
-                passwd = raf.readLine();
-
-                inputUserName = t_user.getText();
-                inputPasswd = Util.charsToString(t_pwd.getPassword());
-
-                if (!userName.equals(inputUserName)) {
-                    new AlertDialog("用户名错误");
-                } else if (!passwd.equals(inputPasswd)) {
-                    new AlertDialog("密码错误");
-                } else {
+                if(!User.login(t_user.getText(),t_pwd.getText()))
+                    new AlertDialog("      用户名或密码错误       ");
+                else {
                     new MainFrame(t_user.getText().trim());
                     this.dispose();
                 }
-
-            } catch (Exception ex) {
-                ex.printStackTrace();
+            } catch (ClassNotFoundException classNotFoundException) {
+                classNotFoundException.printStackTrace();
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
             }
         }
     }

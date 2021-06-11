@@ -1,9 +1,5 @@
 package Util;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-public class Record <T>{
+public class Record {
     private int id;
     private String date;//date以yyyy-MM-dd 格式
     private String type;
@@ -18,7 +14,7 @@ public class Record <T>{
         this.amount = amount;
     }
 
-    public int getid() {
+    public int  getid() {
         return id;
     }
 
