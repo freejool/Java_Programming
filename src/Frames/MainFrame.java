@@ -1,14 +1,18 @@
 package Frames;
 
+import Util.*;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.SQLException;
+
 
 import static java.lang.Boolean.*;
 
 //主界面
-class MainFrame extends JFrame implements ActionListener {
+public class MainFrame extends JFrame implements ActionListener {
     private JMenuBar mb = new JMenuBar();
     private JMenu m_system = new JMenu("系统管理");
     private JMenu m_fm = new JMenu("收支管理");
@@ -81,7 +85,16 @@ class MainFrame extends JFrame implements ActionListener {
                 BorderFactory.createEmptyBorder(5, 5, 5, 5)));
         l_bal = new JLabel();
         String[] cloum = {"编号", "日期", "类型", "内容", "金额",};
-
+        Conn conn = new Conn();
+        List <Util.Record> rsFromSql = null;
+        try {
+            (conn.select());
+            new JTable(rsFromSql, cloum);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            conn.close();
+        }
         Object[][] row = new Object[][]{
                 {"Kathy", "Smith",
                         "Snowboarding", 5, FALSE},
