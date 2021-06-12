@@ -17,8 +17,8 @@ public class LoginFrame extends JFrame implements ActionListener {
         super("欢迎使用个人理财账本!");
         l_user = new JLabel("用户名：", JLabel.RIGHT);
         l_pwd = new JLabel("    密码：", JLabel.RIGHT);
-        t_user = new JTextField("", 31); // TODO delete t
-        t_pwd = new JPasswordField("", 31); // TODO delete t
+        t_user = new JTextField("admin", 31);
+        t_pwd = new JPasswordField("123", 31);
         b_ok = new JButton("登录");
         b_cancel = new JButton("退出");
         //布局方式FlowLayout，一行排满排下一行
@@ -39,7 +39,7 @@ public class LoginFrame extends JFrame implements ActionListener {
         b_cancel.addActionListener(this);
         //界面大小不可调整
         this.setResizable(true);
-        this.setSize(390, 150);
+        this.setSize(450, 120);
 
         //界面显示居中
         Dimension screen = this.getToolkit().getScreenSize();

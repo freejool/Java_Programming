@@ -8,18 +8,19 @@ import java.awt.event.ActionListener;
 
 public class AlertDialog extends JDialog implements ActionListener {
 
-    private JLabel jLabel = new JLabel();
-    private JButton jButton = new JButton();
+    private JLabel alertLabel = new JLabel();
+    private JButton alertButton = new JButton();
 
     public AlertDialog(String content) {
-        jLabel.setText(content);
-        jButton.setText("确定");
-        jButton.addActionListener(this);
+        alertLabel.setText(content);
+        alertButton.setText("确定");
+        alertButton.addActionListener(this);
         this.setLayout(new FlowLayout());
-        this.add(jLabel);
-        this.add(jButton);
+        this.add(alertLabel);
+        this.add(alertButton);
         this.setResizable(false);
-        this.setSize(100, 100);
+
+        this.setSize(230, 100);
 
         //界面显示居中
         Dimension screen = this.getToolkit().getScreenSize();
@@ -28,12 +29,12 @@ public class AlertDialog extends JDialog implements ActionListener {
     }
 
     public void setBText(String str){
-        this.jLabel.setText(str);
+        this.alertLabel.setText(str);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (jButton == e.getSource()) {
+        if (alertButton == e.getSource()) {
             this.dispose();
         }
     }

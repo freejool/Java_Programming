@@ -101,6 +101,15 @@ public class Conn {
         return QueryCarryout();
     }
 
+    public List<Record> select(Integer id) throws SQLException {
+        if (id != null) {
+            sql = "select * from t_shouzhi where id='" + id + "'";
+        } else {
+            sql = "select * from t_shouzhi";
+        }
+        return QueryCarryout();
+    }
+
     public List<Record> select(String type, String content) throws SQLException {
         sql = "select * from t_shouzhi where type='" + type + "' and content='" + content + "'";
         return QueryCarryout();

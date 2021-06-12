@@ -2,7 +2,6 @@ package Frames;
 
 import Util.Conn;
 import Util.Record;
-
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -183,9 +182,6 @@ class MainFrame extends JFrame implements ActionListener {
 
             List<Record> list = null;
             ((DefaultTableModel) table.getModel()).getDataVector().clear();
-//            for (int i = model.getRowCount(); i > 0; i--) {
-//                model.removeRow(i - 1);
-//            }
             String[] column = {"编号", "日期", "类型", "内容", "金额",};
             Vector<String> vTitle = new Vector<>();
             Collections.addAll(vTitle, column);
