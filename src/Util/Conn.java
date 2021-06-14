@@ -1,5 +1,6 @@
 package Util;
 
+import java.awt.*;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -13,78 +14,77 @@ public class Conn {
     private ResultSet rs = null;
     private String sql;
 
-    public Conn() {
+    public Conn() throws ClassNotFoundException, SQLException {
         ResourceBundle bundle = ResourceBundle.getBundle("Util/Account");
         String url = bundle.getString("url");
         String username = bundle.getString("username");
         String password = bundle.getString("password");
-        try {
-            //注册驱动
-            //DriverManager.registerDriver(new com.mysql.jdbc.Driver());
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            //连接数据库
-            con = DriverManager.getConnection(url, username, password);
-            //创建数据库执行对象
-            stm = con.createStatement();
-            //执行sql语句
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
+
+        //注册驱动
+        //DriverManager.registerDriver(new com.mysql.jdbc.Driver());
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        //连接数据库
+        con = DriverManager.getConnection(url, username, password);
+        //创建数据库执行对象
+        stm = con.createStatement();
+        //执行sql语句
+
     }
 
 
-    public void insert(Record re) {
+    public void insert(Record re) throws SQLException {
         sql = "insert into t_shouzhi values(" + re.getid() + ",\"" + re.getDate() +
                 "\",\"" + re.getType() + "\",\"" + re.getContent() + "\"," + re.getAmount() + ")";
         updateCarryout();
     }
 
     //通过编号确定修改哪条语句
-    public void update(Record record) {
+    public void update(Record record) throws SQLException,MyException {
         String date = null;//date以yyyy-MM-dd 格式
         String type = null;
         String content = null;
         double amount = 0;
-        try {
-            rs = stm.executeQuery("select * from t_shouzhi where id=" + record.getid());
-            if (!rs.next()) {
-                System.out.println("编号输入错误，没有这条数据");
-                return;
-            } else {
-                date = rs.getString("date");//date以yyyy-MM-dd 格式
-                type = rs.getString("type");
-                content = rs.getString("content");
-                amount = rs.getDouble("amount");
-            }
-            if (record.getDate() != null) date = record.getDate();
-            if (record.getType() != null) type = record.getType();
-            if (record.getContent() != null) content = record.getContent();
-            if (record.getAmount() != null) amount = record.getAmount();
 
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        rs = stm.executeQuery("select * from t_shouzhi where id=" + record.getid());
+        if (!rs.next()) {
+            System.out.println("编号输入错误，没有这条数据");
+            return;
+        } else {
+            date = rs.getString("date");//date以yyyy-MM-dd 格式
+            type = rs.getString("type");
+            content = rs.getString("content");
+            amount = rs.getDouble("amount");
         }
+        if (record.getDate() != null) date = record.getDate();
+        if (record.getType() != null) {
+            type = record.getType();
+            if(!type.equals("收入") &&!type.equals("支出")){
+                throw new MyException("类型必须为收入或支出");
+            }
+
+        }
+        if (record.getContent() != null) content = record.getContent();
+        if (record.getAmount() != null) amount = record.getAmount();
+
+
         sql = "update t_shouzhi set date=\"" + date + "\",Type=\"" + type +
                 "\",content=\"" + content + "\",amount=" + amount + " where id=" + record.getid();
         updateCarryout();
     }
 
-    public void delete(Record record) {
+    public void delete(Record record) throws SQLException {
 
         sql = "delete from t_shouzhi where id=" + record.getid();
         updateCarryout();
     }
 
-    private void updateCarryout() {
-        try {
-            int num = stm.executeUpdate(sql);
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss sss");
-            System.out.println(sdf.format(new Date()) + "成功修改" + num + "条数据");
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
+    private void updateCarryout() throws SQLException {
+
+        int num = stm.executeUpdate(sql);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss sss");
+        System.out.println(sdf.format(new Date()) + "成功修改" + num + "条数据");
+
+
     }
 
     public List<Record> select(String fromDate, String toDate, String type) throws SQLException {
@@ -136,7 +136,7 @@ public class Conn {
     }
 
     public Double sumIncome() throws SQLException {
-        sql = "select sum(amount) sumincome from t_shouzhi where type='income'";
+        sql = "select sum(amount) sumincome from t_shouzhi where type='收入'";
         rs = stm.executeQuery(sql);
         if (!rs.next()) {
             return null;
@@ -145,7 +145,7 @@ public class Conn {
     }
 
     public Double sumOutcome() throws SQLException {
-        sql = "select sum(amount) sumoutcome from t_shouzhi where type='outcome'";
+        sql = "select sum(amount) sumoutcome from t_shouzhi where type='支出'";
         rs = stm.executeQuery(sql);
         if (!rs.next()) {
             return null;

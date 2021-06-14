@@ -6,7 +6,14 @@ import java.util.Vector;
 
 public class DataRefresh {
     public static Vector refresh(){
-        Conn con=new Conn();
+        Conn con= null;
+        try {
+            con = new Conn();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
         List<Record> list = null;
         try {
             list = con.select();

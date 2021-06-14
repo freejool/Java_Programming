@@ -6,6 +6,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
+import java.util.Arrays;
 
 public class LoginFrame extends JFrame implements ActionListener {
     private JLabel l_user, l_pwd; //用户名标签，密码标签
@@ -18,7 +19,7 @@ public class LoginFrame extends JFrame implements ActionListener {
         l_user = new JLabel("用户名：", JLabel.RIGHT);
         l_pwd = new JLabel("    密码：", JLabel.RIGHT);
         t_user = new JTextField("admin", 31);
-        t_pwd = new JPasswordField("123", 31);
+        t_pwd = new JPasswordField( "123",31);
         b_ok = new JButton("登录");
         b_cancel = new JButton("退出");
         //布局方式FlowLayout，一行排满排下一行
@@ -54,16 +55,16 @@ public class LoginFrame extends JFrame implements ActionListener {
         } else if (b_ok == e.getSource()||t_pwd==e.getSource()) {
             //添加代码，验证身份成功后显示主界面
             try {
-                if(!User.login(t_user.getText(),t_pwd.getText()))
+                if(!User.login(t_user.getText(), Arrays.toString(t_pwd.getPassword())))
                     new AlertDialog("      用户名或密码错误       ");
                 else {
                     new MainFrame(t_user.getText().trim());
                     this.dispose();
                 }
             } catch (ClassNotFoundException classNotFoundException) {
-                classNotFoundException.printStackTrace();
+            new AlertDialog("未知错误! 请联系管理员");
             } catch (SQLException throwables) {
-                throwables.printStackTrace();
+                new AlertDialog("数据库连接失败! 请联系管理员");
             }
         }
     }

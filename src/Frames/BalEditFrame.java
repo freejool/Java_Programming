@@ -1,12 +1,14 @@
 package Frames;
 
 import Util.Conn;
+import Util.MyException;
 import Util.Record;
 import Util.DataRefresh;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.xml.catalog.Catalog;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -19,12 +21,12 @@ import java.util.Vector;
 
 
 //收支编辑界面
-class BalEditFrame extends JFrame implements ActionListener, ItemListener {
+class BalEditFrame extends JFrame  implements ActionListener, ItemListener  {
     private JLabel l_id, l_date, l_bal, l_type, l_item;
     private JTextField t_id, t_date, t_bal;
     private DateChooser dateChooser = DateChooser.getInstance("yyyy-MM-dd");
 
-    private JComboBox c_type, c_item;
+    private JComboBox<String> c_type, c_item;
     private JButton b_update, b_delete, b_select, b_new, b_clear;
     private JPanel p1, p2, p3;
     private JScrollPane scrollpane;
@@ -34,20 +36,18 @@ class BalEditFrame extends JFrame implements ActionListener, ItemListener {
     private String[] balType = {"收入", "支出"};
     private String[] itemTypeIn = {"工资", "奖金", "其他"};
     private String[] itemTypeOut = {"购物", "餐饮", "居家", "交通", "娱乐", "人情", "其他"};
-    private String[] cloum = {"编号", "日期", "类型", "内容", "金额"};
-    private JButton tempButton;
-    private JDialog tempDialog;
+    private String[] column = {"编号", "日期", "类型", "内容", "金额"};
 
 
     public BalEditFrame() {
         super("收支编辑");
-        l_id = new JLabel("编号：");
-        l_date = new JLabel("日期：");
-        l_bal = new JLabel("金额：");
-        l_type = new JLabel("类型：");
-        l_item = new JLabel("内容：");
+        l_id = new JLabel("编号:");
+        l_date = new JLabel("日期:");
+        l_bal = new JLabel("金额:");
+        l_type = new JLabel("类型:");
+        l_item = new JLabel("内容:");
         t_id = new JTextField(null, 8);
-        t_date = new JTextField(null);
+        t_date = new JTextField("点击选择日期");
         dateChooser.register(t_date); // using JTextField to decorate DataChooser
         t_bal = new JTextField(null, 8);
 
@@ -57,7 +57,7 @@ class BalEditFrame extends JFrame implements ActionListener, ItemListener {
         c_type.addActionListener(this);
 
         c_item = new JComboBox<>(itemTypeIn);
-//        c_item.setEditable(true);
+//        c_item.setEditable(true); // FIXME style changes when use this, consider a better way to perform
         b_new = new JButton("录入");
         b_new.setToolTipText("在左侧输入要录入的内容，然后点击该按钮");
         b_update = new JButton("修改");
@@ -73,7 +73,7 @@ class BalEditFrame extends JFrame implements ActionListener, ItemListener {
         c.setLayout(new BorderLayout());
 
         p1 = new JPanel();
-        p1.setLayout(new GridLayout(5, 2, 10, 10));
+        p1.setLayout(new GridLayout(5, 2, 5, 5));
         p1.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createTitledBorder("编辑收支信息"),
                 BorderFactory.createEmptyBorder(5, 5, 5, 5)));
@@ -104,12 +104,13 @@ class BalEditFrame extends JFrame implements ActionListener, ItemListener {
                 BorderFactory.createTitledBorder("显示收支信息"),
                 BorderFactory.createEmptyBorder(5, 5, 5, 5)));
 
-        Conn con = new Conn();
+
         List<Record> list = null;
         try {
+            Conn con = new Conn();
             list = con.select();
         } catch (
-                SQLException throwables) {
+                SQLException | ClassNotFoundException throwables) {
             throwables.printStackTrace();
         }
         String[] column = {"编号", "日期", "类型", "内容", "金额",};
@@ -138,7 +139,7 @@ class BalEditFrame extends JFrame implements ActionListener, ItemListener {
         };
         table.setModel(model);
         //不可编辑
-//        table.setEnabled(false);
+        //table.setEnabled(false);
         //列不可拖动
         table.getTableHeader().setReorderingAllowed(false);
         //列大小不可变
@@ -149,6 +150,7 @@ class BalEditFrame extends JFrame implements ActionListener, ItemListener {
         DefaultTableCellRenderer cr = new DefaultTableCellRenderer();
         cr.setHorizontalAlignment(JLabel.CENTER);
         table.setDefaultRenderer(Object.class, cr);
+
         scrollpane = new JScrollPane(table);
         scrollpane.setViewportView(table);
         scrollpane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
@@ -162,28 +164,30 @@ class BalEditFrame extends JFrame implements ActionListener, ItemListener {
         b_clear.addActionListener(this);
 
         //添加代码，为table添加鼠标点击事件监听addMouseListener
-
         this.setResizable(false);
         this.setSize(800, 300);
         Dimension screen = this.getToolkit().getScreenSize();
         this.setLocation((screen.width - this.getSize().width) / 2, (screen.height - this.getSize().height) / 2);
         this.setVisible(true);
-
-        new AlertDialog("将鼠标移到按钮内来获取帮助");
+        //new AlertDialog("将鼠标移到按钮内来获取帮助");
 
 
     }
 
-    public void actionPerformed(ActionEvent e) {
-        Conn conn = new Conn();
+    public void actionPerformed(ActionEvent e)  {
+        Conn conn = null;
+        try {
+            conn = new Conn();
+        } catch (ClassNotFoundException | SQLException exception) {
+            exception.printStackTrace();
+        }
         List<Record> list = null;
-        String[] column = {"编号", "日期", "类型", "内容", "金额",};
         Vector<String> vTitle = new Vector<>();
         Collections.addAll(vTitle, column);
         Vector<Vector<Object>> vData = new Vector<>();
         Vector<Object> vRow = null;
-        if (b_select == e.getSource()) {  //查询所有收支信息
-            //添加代码
+        if (b_select == e.getSource()) {
+            //查询所有收支信息
             //编号为空时返回所有记录，非空时先检查合法性再返回
             String textID = t_id.getText();
             Integer id = null;
@@ -196,25 +200,82 @@ class BalEditFrame extends JFrame implements ActionListener, ItemListener {
                 throwables.printStackTrace();
             }
         } else if (b_update == e.getSource()) {  // 修改某条收支信息
-            /*System.out.println(t_date.getText().trim().equals(""));
-            System.out.println(t_bal.getText().trim().equals(""));*/
-        } else if (b_delete == e.getSource()) {   //删除某条收支信息
-
             int indexSelected = table.getSelectedRow();
-            Object o=table.getValueAt(indexSelected, 0);
-            Integer s = ((Integer) o);
-//            int id = Integer.parseInt(s);
-            conn.delete(new Record(s, null, null, null, null));
             try {
+                conn.update(new Record((int) table.getValueAt(indexSelected, 0),
+                        (String) table.getValueAt(indexSelected, 1),
+                        (String) table.getValueAt(indexSelected, 2),
+                        (String) table.getValueAt(indexSelected, 3),
+                        Double.parseDouble((String) table.getValueAt(indexSelected, 4))));
+
+                new AlertDialog("修改成功");
+            } catch (SQLException throwables) {
+                new AlertDialog("修改失败");
+            } catch (NumberFormatException numberFormatException) {
+                new AlertDialog("请输入正确的数值" + numberFormatException.getMessage());
+            } catch (MyException myException) {
+                new AlertDialog(myException.getMessage());
+            } finally {
+                try {
+                    list = conn.select((Integer) null);
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+        } else if (b_delete == e.getSource()) {   //删除某条收支信息
+            int indexSelected = table.getSelectedRow();
+            Object o = table.getValueAt(indexSelected, 0);
+            Integer s = ((Integer) o);
+            try {
+                conn.delete(new Record(s, null, null, null, null));
                 list = conn.select((Integer) null);
+            } catch (SQLException throwables) {
+                new AlertDialog("删除失败");
+            }
+            new AlertDialog("删除成功");
+        } else if (b_new == e.getSource()) {   //新增某条收支信息
+            if (t_id.getText().trim().equals("") ||
+                    t_bal.getText().trim().equals("") ||
+                    t_date.getText().trim().equals("")) {
+                new AlertDialog("录入失败，信息不完整");
+            } else {
+                String content = (String) c_item.getSelectedItem();
+                /*if (balType[c_type.getSelectedIndex()].equals("收入"))
+                    content = itemTypeIn[c_item.getSelectedIndex()];
+                else {
+                    content = itemTypeOut[c_item.getSelectedIndex()];
+                }*/
+                try {
+                    conn.insert(new Record(Integer.parseInt(t_id.getText()),
+                            dateChooser.getStrDate(),
+                            (String) c_type.getSelectedItem(),
+                            content,
+                            Double.valueOf(t_bal.getText())
+                    ));
+                    new AlertDialog("录入成功");
+                } catch (SQLException throwables) {
+                    new AlertDialog("录入失败，请重试");
+                } catch (NumberFormatException numberFormatException) {
+                    new AlertDialog("请在编号和金额内输入正确的数值!");
+                } finally {
+                    try {
+                        list = conn.select();
+                    } catch (SQLException throwables) {
+                        throwables.printStackTrace();
+                    }
+                }
+            }
+
+        } else if (b_clear == e.getSource()) {
+            //清空输入框
+            t_id.setText("");
+            t_date.setText("点击选择日期");
+            t_bal.setText("");
+            try {
+                list = conn.select();
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
             }
-
-        } else if (b_new == e.getSource()) {   //新增某条收支信息
-            //添加代码
-        } else if (b_clear == e.getSource()) {   //清空输入框
-            //添加代码
         }
         if (list != null) {
             for (Record i : list) {
@@ -238,6 +299,7 @@ class BalEditFrame extends JFrame implements ActionListener, ItemListener {
 
     @Override
     public void itemStateChanged(ItemEvent e) {
+
         if (e.getStateChange() == ItemEvent.SELECTED) {
             if (e.getItem().equals("收入")) {
                 c_item.removeAllItems();
@@ -251,7 +313,9 @@ class BalEditFrame extends JFrame implements ActionListener, ItemListener {
                 }
             }
         }
+
         p1.repaint();
+        p2.repaint();
     }
 }
 

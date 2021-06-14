@@ -7,6 +7,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
+import java.util.Arrays;
 
 //修改密码界面
 class ModifyPwdFrame extends JFrame implements ActionListener {
@@ -51,15 +52,15 @@ class ModifyPwdFrame extends JFrame implements ActionListener {
             this.dispose();
         }else if(b_ok==e.getSource()||t_newPWDAgain==e.getSource()){  //修改密码
             try {
-                if(User.Modify(t_oldPWD.getText(),t_newPWD.getText())){
+                if(User.Modify(Arrays.toString(t_oldPWD.getPassword()), Arrays.toString(t_newPWD.getPassword()))){
                     new PwdChangedDialog("密码修改成功，请重新登录");
                 }else{
                     new AlertDialog("修改失败,请重试");
                 }
             } catch (ClassNotFoundException classNotFoundException) {
-                classNotFoundException.printStackTrace();
+                new AlertDialog("未知错误请! 联系管理员");
             } catch (SQLException throwables) {
-                throwables.printStackTrace();
+                new AlertDialog("数据库连接失败! 请联系管理员");
             }
         }
     }

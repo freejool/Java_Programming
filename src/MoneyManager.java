@@ -1,12 +1,19 @@
 
+import Frames.AlertDialog;
 import Frames.LoginFrame;
 
 import javax.swing.*;
+import java.util.PrimitiveIterator;
 
 public class MoneyManager {
     public static void main(String[] args) {
-        LoginFrame lf=new LoginFrame();
-        lf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        LoginFrame lf=null;
+        try {
+            lf = new LoginFrame();
+            lf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        }catch (Exception e){
+            new AlertDialog(e.getMessage());
+        }
     }
 }
 

@@ -18,7 +18,7 @@ public class AlertDialog extends JDialog implements ActionListener {
         this.setLayout(new FlowLayout());
         this.add(alertLabel);
         this.add(alertButton);
-        this.setResizable(false);
+        this.setResizable(true);
 
         this.setSize(230, 100);
 

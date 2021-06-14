@@ -85,7 +85,14 @@ class MainFrame extends JFrame implements ActionListener {
                 BorderFactory.createTitledBorder("收支明细信息"),
                 BorderFactory.createEmptyBorder(5, 5, 5, 5)));
         l_bal = new JLabel();
-        Conn con = new Conn();
+        Conn con = null;
+        try {
+            con = new Conn();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
         List<Record> list = null;
         try {
             list = con.select();
@@ -168,7 +175,14 @@ class MainFrame extends JFrame implements ActionListener {
 
         } else if (temp == b_select) {
             //根据收支类型查询
-            Conn con = new Conn();
+            Conn con = null;
+            try {
+                con = new Conn();
+            } catch (ClassNotFoundException classNotFoundException) {
+                classNotFoundException.printStackTrace();
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
 
             String fromDate = dateChooserFromDate.getStrDate();
             String toDate = dateChooserToDate.getStrDate();
@@ -190,21 +204,21 @@ class MainFrame extends JFrame implements ActionListener {
             if (Objects.equals(c_type.getSelectedItem(), "总账单")) {
                 try {
                     list = con.select(fromDate, toDate, null);
-                } catch (
+                }catch (
                         SQLException throwables) {
                     throwables.printStackTrace();
                 }
 
             } else if (Objects.equals(c_type.getSelectedItem(), "收入")) {
                 try {
-                    list = con.select(fromDate, toDate, "income");
+                    list = con.select(fromDate, toDate, "收入");
                 } catch (
                         SQLException throwables) {
                     throwables.printStackTrace();
                 }
             } else if (Objects.equals(c_type.getSelectedItem(), "支出")) {
                 try {
-                    list = con.select(fromDate, toDate, "outcome");
+                    list = con.select(fromDate, toDate, "支出");
                 } catch (
                         SQLException throwables) {
                     throwables.printStackTrace();
