@@ -1,14 +1,11 @@
 package Frames;
 
 import Util.Conn;
-import Util.MyException;
 import Util.Record;
-import Util.DataRefresh;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import javax.xml.catalog.Catalog;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -21,7 +18,7 @@ import java.util.Vector;
 
 
 //收支编辑界面
-class BalEditFrame extends JFrame  implements ActionListener, ItemListener  {
+class BalEditFrame extends JFrame implements ActionListener, ItemListener {
     private JLabel l_id, l_date, l_bal, l_type, l_item;
     private JTextField t_id, t_date, t_bal;
     private DateChooser dateChooser = DateChooser.getInstance("yyyy-MM-dd");
@@ -152,8 +149,9 @@ class BalEditFrame extends JFrame  implements ActionListener, ItemListener  {
         table.setDefaultRenderer(Object.class, cr);
 
         scrollpane = new JScrollPane(table);
-        scrollpane.setViewportView(table);
+        scrollpane.setPreferredSize(new Dimension(450, 250));
         scrollpane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        scrollpane.setViewportView(table);
         p3.add(scrollpane);
         c.add(p3, BorderLayout.EAST);
 
@@ -165,7 +163,7 @@ class BalEditFrame extends JFrame  implements ActionListener, ItemListener  {
 
         //添加代码，为table添加鼠标点击事件监听addMouseListener
         this.setResizable(false);
-        this.setSize(800, 300);
+        this.setSize(800, 330);
         Dimension screen = this.getToolkit().getScreenSize();
         this.setLocation((screen.width - this.getSize().width) / 2, (screen.height - this.getSize().height) / 2);
         this.setVisible(true);
@@ -174,7 +172,7 @@ class BalEditFrame extends JFrame  implements ActionListener, ItemListener  {
 
     }
 
-    public void actionPerformed(ActionEvent e)  {
+    public void actionPerformed(ActionEvent e) {
         Conn conn = null;
         try {
             conn = new Conn();
@@ -191,30 +189,41 @@ class BalEditFrame extends JFrame  implements ActionListener, ItemListener  {
             //编号为空时返回所有记录，非空时先检查合法性再返回
             String textID = t_id.getText();
             Integer id = null;
-            if (!textID.equals("")) {
-                id = Integer.parseInt(textID);
-            }
+
+
             try {
-                list = conn.select(id);
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
+                if (!textID.equals("")) {
+                    id = Integer.parseInt(textID);
+                }
+            } catch (NumberFormatException numberFormatException) {
+                new AlertDialog("编号有误!");
+            } finally {
+                try {
+                    list = conn.select(id);
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
             }
         } else if (b_update == e.getSource()) {  // 修改某条收支信息
-            int indexSelected = table.getSelectedRow();
             try {
-                conn.update(new Record((int) table.getValueAt(indexSelected, 0),
+                int indexSelected = table.getSelectedRow();
+                Record r = new Record((int) table.getValueAt(indexSelected, 0),
                         (String) table.getValueAt(indexSelected, 1),
                         (String) table.getValueAt(indexSelected, 2),
                         (String) table.getValueAt(indexSelected, 3),
-                        Double.parseDouble((String) table.getValueAt(indexSelected, 4))));
+                        Double.parseDouble((String) table.getValueAt(indexSelected, 4)));
+                conn.update(r);
 
                 new AlertDialog("修改成功");
+            } catch (ArrayIndexOutOfBoundsException arrayIndexOutOfBoundsException) {
+                new AlertDialog("请重新选择要修改的记录");
             } catch (SQLException throwables) {
                 new AlertDialog("修改失败");
-            } catch (NumberFormatException numberFormatException) {
-                new AlertDialog("请输入正确的数值" + numberFormatException.getMessage());
-            } catch (MyException myException) {
-                new AlertDialog(myException.getMessage());
+            } catch (NumberFormatException | ClassCastException numberFormatException) {
+                new AlertDialog("请输入正确的数值");
+            } catch (Exception myException) {
+                new AlertDialog("操作有误，请重试！");
+                myException.printStackTrace();
             } finally {
                 try {
                     list = conn.select((Integer) null);
@@ -240,11 +249,7 @@ class BalEditFrame extends JFrame  implements ActionListener, ItemListener  {
                 new AlertDialog("录入失败，信息不完整");
             } else {
                 String content = (String) c_item.getSelectedItem();
-                /*if (balType[c_type.getSelectedIndex()].equals("收入"))
-                    content = itemTypeIn[c_item.getSelectedIndex()];
-                else {
-                    content = itemTypeOut[c_item.getSelectedIndex()];
-                }*/
+
                 try {
                     conn.insert(new Record(Integer.parseInt(t_id.getText()),
                             dateChooser.getStrDate(),
@@ -254,7 +259,7 @@ class BalEditFrame extends JFrame  implements ActionListener, ItemListener  {
                     ));
                     new AlertDialog("录入成功");
                 } catch (SQLException throwables) {
-                    new AlertDialog("录入失败，请重试");
+                    new AlertDialog("输入有误，请重试");
                 } catch (NumberFormatException numberFormatException) {
                     new AlertDialog("请在编号和金额内输入正确的数值!");
                 } finally {
@@ -313,7 +318,6 @@ class BalEditFrame extends JFrame  implements ActionListener, ItemListener  {
                 }
             }
         }
-
         p1.repaint();
         p2.repaint();
     }

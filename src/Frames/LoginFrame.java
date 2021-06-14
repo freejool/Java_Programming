@@ -1,12 +1,12 @@
 package Frames;
 
 import Util.*;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
-import java.util.Arrays;
 
 public class LoginFrame extends JFrame implements ActionListener {
     private JLabel l_user, l_pwd; //用户名标签，密码标签
@@ -18,8 +18,8 @@ public class LoginFrame extends JFrame implements ActionListener {
         super("欢迎使用个人理财账本!");
         l_user = new JLabel("用户名：", JLabel.RIGHT);
         l_pwd = new JLabel("    密码：", JLabel.RIGHT);
-        t_user = new JTextField("admin", 31);
-        t_pwd = new JPasswordField( "123",31);
+        t_user = new JTextField("", 31);
+        t_pwd = new JPasswordField("", 31);
         b_ok = new JButton("登录");
         b_cancel = new JButton("退出");
         //布局方式FlowLayout，一行排满排下一行
@@ -39,8 +39,8 @@ public class LoginFrame extends JFrame implements ActionListener {
         t_pwd.addActionListener(this);
         b_cancel.addActionListener(this);
         //界面大小不可调整
-        this.setResizable(true);
-        this.setSize(450, 120);
+        this.setResizable(false);
+        this.setSize(440, 120);
 
         //界面显示居中
         Dimension screen = this.getToolkit().getScreenSize();
@@ -52,17 +52,18 @@ public class LoginFrame extends JFrame implements ActionListener {
         if (b_cancel == e.getSource()) {
             this.dispose();
             //添加退出代码
-        } else if (b_ok == e.getSource()||t_pwd==e.getSource()) {
+        } else if (b_ok == e.getSource() || t_pwd == e.getSource()) {
             //添加代码，验证身份成功后显示主界面
             try {
-                if(!User.login(t_user.getText(), Arrays.toString(t_pwd.getPassword())))
+                if (!User.login(t_user.getText(), Util.tostring(t_pwd.getPassword())))
                     new AlertDialog("      用户名或密码错误       ");
                 else {
-                    new MainFrame(t_user.getText().trim());
+                    MainFrame mf = new MainFrame(t_user.getText().trim());
+                    mf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                     this.dispose();
                 }
             } catch (ClassNotFoundException classNotFoundException) {
-            new AlertDialog("未知错误! 请联系管理员");
+                new AlertDialog("未知错误! 请联系管理员");
             } catch (SQLException throwables) {
                 new AlertDialog("数据库连接失败! 请联系管理员");
             }

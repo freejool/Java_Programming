@@ -1,10 +1,16 @@
 package Util;
 
-/**
- * a func to compare char []
- * param: char[] ch1, char[] ch2
- */
+import java.lang.reflect.Array;
+
 public class Util {
+    public static String tostring(char[] chs){
+        StringBuilder sb=new StringBuilder("");
+        for (int i = 0; i < Array.getLength(chs); i++) {
+            sb.append(chs[i]);
+        }
+        return sb.toString();
+
+    }
 
     public static int chCmp(char[] ch1, char[] ch2) {
         int length1 = ch1.length;
@@ -20,18 +26,12 @@ public class Util {
         return 0;
     }
 
-    public static String charsToString(char [] chars){
-        StringBuilder sb=new StringBuilder("");
-        for (char aChar : chars) {
-            sb.append(aChar);
-        }
-        return sb.toString();
-    }
+
 
     public static void main(String[] args) {
         char [] a= {'a','b','c','d','e'};
 
-        String str=charsToString(a);
-        System.out.println(str);
+
+        System.out.println( tostring(a));
     }
 }

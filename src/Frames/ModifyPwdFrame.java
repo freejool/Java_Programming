@@ -1,6 +1,7 @@
 package Frames;
 
 import Util.User;
+import Util.Util;
 
 import javax.swing.*;
 import java.awt.*;
@@ -51,16 +52,27 @@ class ModifyPwdFrame extends JFrame implements ActionListener {
         if(b_cancel==e.getSource()){
             this.dispose();
         }else if(b_ok==e.getSource()||t_newPWDAgain==e.getSource()){  //修改密码
-            try {
-                if(User.Modify(Arrays.toString(t_oldPWD.getPassword()), Arrays.toString(t_newPWD.getPassword()))){
-                    new PwdChangedDialog("密码修改成功，请重新登录");
-                }else{
-                    new AlertDialog("修改失败,请重试");
+            if (!Util.tostring(t_newPWDAgain.getPassword()).equals(Util.tostring(t_newPWD.getPassword()))){
+                new AlertDialog("两次密码输入不一致，请重新输入");
+                t_newPWD.setText("");
+                t_oldPWD.setText("");
+                t_newPWDAgain.setText("");
+            }
+            else {
+                try {
+                    if (User.Modify(Util.tostring(t_oldPWD.getPassword()), Util.tostring(t_newPWD.getPassword()))) {
+                        new PwdChangedDialog("密码修改成功，请重新登录");
+                    } else {
+                        new AlertDialog("修改失败,请重试");
+                        t_oldPWD.setText("");
+                        t_newPWDAgain.setText("");
+                        t_newPWD.setText("");
+                    }
+                } catch (ClassNotFoundException classNotFoundException) {
+                    new AlertDialog("未知错误请! 联系管理员");
+                } catch (SQLException throwables) {
+                    new AlertDialog("数据库连接失败! 请联系管理员");
                 }
-            } catch (ClassNotFoundException classNotFoundException) {
-                new AlertDialog("未知错误请! 联系管理员");
-            } catch (SQLException throwables) {
-                new AlertDialog("数据库连接失败! 请联系管理员");
             }
         }
     }
